@@ -1,32 +1,22 @@
 #include <iostream>
+#include <memory>
 #include <SDL2/SDL.h>
 
-#include "RenderManager.h"
+#include "Game.hpp"
+
+Game *game = nullptr;
 
 int main(int argv, char *args[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) > 0)
-        std::cout << "GG MAN YOURE FKED" << std::endl;
-    else
+    game = new Game();
+    game->init("HOLY SMOKES", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, false);
+
+    while (game->running())
     {
-        RenderManager renderManager = RenderManager();
-        renderManager.createMainWindow("HOLY SMOKES");
-        SDL_Event event;
-
-        bool isGameRuning = true;
-
-        while (isGameRuning)
-        {
-            while (SDL_PollEvent(&event))
-            {
-                if(event.type == SDL_QUIT) {
-                    renderManager.quit();
-                    isGameRuning = false;
-                    break;
-                }
-            }
-            renderManager.render(renderManager.loadTexture("resource/texture_sample.jpg"));
-        }
+        game->handleEvent();
+        game->update();
+        game->render();
     }
+
     return 0;
 }
