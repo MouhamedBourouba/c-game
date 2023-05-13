@@ -1,28 +1,88 @@
 #include "Game.hpp"
 #include <iostream>
+#include <SDL2/SDL_image.h>
+#include "GameObject.hpp"
 
-Game::Game() {}
+SDL_Renderer *Game::renderer;
+Map *map;
 
-Game::~Game()
+Game::Game(GameInfo gameInfo) : gameInfo(gameInfo), isRunning(true) {}
+Game::~Game() {}
+
+int lvl0[20][25] = {
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+};
+
+void Game::run(int MaxFPS)
 {
-}
+    if (!(initSDL() && loadMedia()))
+    {
+        SDL_Log("error while init Sdl or loading media");
+    }
 
-void Game::init(const char *title, int xpos, int ypos, int width, int hight, bool fullscreen)
+    while (isRunning)
+    {
+        totalTime = SDL_GetTicks();
+        handleEvent();
+        update();
+        render();
+        if ((SDL_GetTicks() - totalTime) < (1000 / MaxFPS))
+            SDL_Delay((1000 / MaxFPS) - (SDL_GetTicks() - totalTime));
+    };
+}
+bool Game::initSDL()
 {
     int flags = 0;
-
-    if (fullscreen)
+    if (gameInfo.fullscreen)
         flags = SDL_WINDOW_FULLSCREEN;
 
-    if (SDL_Init(SDL_INIT_VIDEO) > 0)
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
-        window = SDL_CreateWindow(title, xpos, ypos, width, hight, flags);
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        isRunning = true;
+        SDL_Log("Feild to init sdl: ", SDL_GetError());
+        return false;
     }
+
+    mWindow = SDL_CreateWindow(gameInfo.title, gameInfo.xpos, gameInfo.ypos, gameInfo.width, gameInfo.hight, flags);
+    renderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+
+    if (mWindow == nullptr || renderer == nullptr)
+    {
+        SDL_Log("cant create window or renderer: ", SDL_GetError());
+        return false;
+    }
+    return true;
 }
+
+bool Game::loadMedia()
+{
+    map = new Map();
+    mPlayer.texture = IMG_LoadTexture(renderer, "resource/charcterl.png");
+    return true;
+}
+
 void Game::update()
 {
+    mPlayer.dstRect.x++;
+    mPlayer.dstRect.y++;
 }
 
 void Game::handleEvent()
@@ -44,12 +104,15 @@ void Game::handleEvent()
 void Game::render()
 {
     SDL_RenderClear(renderer);
-    // rendering logic
+    map->drawMap();
+    SDL_RenderCopy(renderer, mPlayer.texture, NULL, &mPlayer.dstRect);
     SDL_RenderPresent(renderer);
 }
 
 void Game::clean()
 {
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(mWindow);
     SDL_DestroyRenderer(renderer);
+    SDL_DestroyTexture(mPlayer.texture);
+    SDL_Quit();
 }

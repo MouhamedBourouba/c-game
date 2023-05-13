@@ -1,24 +1,34 @@
 #ifndef GAME_H
 #define GAME_H
 #include <SDL2/SDL.h>
+
+#include "GameInfo.hpp"
+#include "GameObject.hpp"
+#include "Map.hpp"
+
 #pragma once
 
 class Game
 {
 public:
-    Game();
+    Game(GameInfo gameInfo);
     ~Game();
-    void init(const char *title, int xpos, int ypos, int width, int hight, bool fullscreen);
+    void run(int MAX_FPS);
+
+    static SDL_Renderer* renderer;
+
+private:
+    bool initSDL();
     void update();
+    bool loadMedia();
     void handleEvent();
     void render();
     void clean();
-    bool running() { return isRunning; }
-
-private:
+    SDL_Window *mWindow;
+    GameObject mPlayer = {{0, 0, 64, 64}, nullptr, true};
     bool isRunning;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    Uint32 totalTime;
+    GameInfo gameInfo;
 };
 
 #endif
