@@ -2,9 +2,14 @@
 #include <iostream>
 #include <SDL2/SDL_image.h>
 #include "GameObject.hpp"
+#include "Components.hpp"
+#include "ECS.hpp"
 
 SDL_Renderer *Game::renderer;
 Map *map;
+
+Manager manager;
+auto &newPlayer(manager.addEntity());
 
 Game::Game(GameInfo gameInfo) : gameInfo(gameInfo), isRunning(true) {}
 Game::~Game() {}
@@ -69,6 +74,7 @@ bool Game::initSDL()
         SDL_Log("cant create window or renderer: ", SDL_GetError());
         return false;
     }
+    newPlayer.addComponent<PositionComponent>();
     return true;
 }
 
@@ -83,6 +89,8 @@ void Game::update()
 {
     mPlayer.dstRect.x++;
     mPlayer.dstRect.y++;
+    manager.update();
+    std::cout << newPlayer.getComponent<PositionComponent>().getXPos() << std::endl;
 }
 
 void Game::handleEvent()
