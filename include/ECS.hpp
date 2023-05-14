@@ -105,6 +105,9 @@ public:
     }
     void refresh()
     {
+        entities.erase(std::remove_if(
+            std::begin(entities), std::end(entities), [](std::unique_ptr<Entity> entityPtr)
+            { return !entityPtr->isActive(); }));
     }
     Entity &addEntity()
     {
