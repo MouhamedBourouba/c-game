@@ -10,6 +10,7 @@ class Map
 public:
     Map();
     ~Map();
+    void init();
     void loadMap(int arr[20][25]);
     void drawMap();
 

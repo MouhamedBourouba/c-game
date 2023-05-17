@@ -5,42 +5,37 @@
 #include "TextureManager.hpp"
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <iostream>
 #pragma once
 
 class SpriteComponent : public Component {
 private:
-   PositionComponent positionComponent;
-   SDL_Texture *texture;
-   SDL_Rect src, dst;
+  PositionComponent posComp() {
+    return entity->getComponent<PositionComponent>();
+  };
+  SDL_Texture *texture;
+  SDL_Rect src, dst;
+
 public:
-   SpriteComponent() = default;
+  SpriteComponent() = default;
 
-   SpriteComponent(const char *filePath)
-   {
-      texture = TextureManager::loadTexture(filePath);
-      sw
-   }
+  SpriteComponent(const char *filePath) {
+    texture = TextureManager::loadTexture(filePath);
+  }
 
-   void init() override
-   {
-      positionComponent = entity->getComponent <PositionComponent>();
+  void init() override {
+    src.x = src.y = 0;
+    dst.x = dst.y = 0;
+    src.w = src.h = 32;
+    dst.w = dst.h = 64;
+  }
 
-      src.x = src.y = 0;
-      dst.x = dst.y = 0;
-      src.w = src.h = 32;
-      dst.w = dst.h = 64;
-   }
+  void draw() override { TextureManager::draw(texture, &src, &dst); }
 
-   void draw() override
-   {
-      TextureManager::draw(texture, &src, &dst);
-   }
-
-   void update() override
-   {
-      dst.x = positionComponent.getXPos();
-      dst.y = positionComponent.getYPos();
-   }
+  void update() override {
+    dst.x = posComp().getXPos();
+    dst.y = posComp().getYPos();
+  }
 };
 
 #endif
