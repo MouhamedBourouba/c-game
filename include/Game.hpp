@@ -3,15 +3,13 @@
 #include <SDL2/SDL.h>
 
 #include "ECS.hpp"
-#include "GameInfo.hpp"
-#include "GameObject.hpp"
 #include "Map.hpp"
 
 #pragma once
 
 class Game {
 public:
-  Game(GameInfo gameInfo);
+  Game();
   ~Game();
   void run(int MAX_FPS);
 
@@ -30,7 +28,6 @@ private:
   Entity &player;
   bool isRunning;
   Uint32 totalTime;
-  GameInfo gameInfo;
 };
 
 #endif

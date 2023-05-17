@@ -2,18 +2,17 @@
 #include "ECS/ECS.hpp"
 #include "ECS/PositionComponent.hpp"
 #include "ECS/SpriteComponent.hpp"
-#include "GameObject.hpp"
 #include "Map.hpp"
 #include "TextureManager.hpp"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
-#include <iostream>
+#include <SDL2/SDL_video.h>
 
 SDL_Renderer *Game::renderer;
 
-Game::Game(GameInfo gameInfo)
-    : gameInfo(gameInfo), isRunning(true), map(Map()), manager(Manager()),
+Game::Game()
+    : isRunning(true), map(Map()), manager(Manager()),
       player(manager.addEntity()) {}
 
 Game::~Game() {}
@@ -52,17 +51,13 @@ void Game::run(int MaxFPS) {
 
 bool Game::initSDL() {
   int flags = 0;
-  if (gameInfo.fullscreen) {
-    flags = SDL_WINDOW_FULLSCREEN;
-  }
-
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cout << "Feild to init sdl: " << SDL_GetError() << std::endl;
     return (false);
   }
 
-  mWindow = SDL_CreateWindow(gameInfo.title, gameInfo.xpos, gameInfo.ypos,
-                             gameInfo.width, gameInfo.hight, flags);
+  mWindow = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED,
+                             SDL_WINDOWPOS_CENTERED, 800, 640, 0);
   renderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
 
   if (mWindow == nullptr || renderer == nullptr) {
