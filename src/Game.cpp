@@ -4,10 +4,14 @@
 #include "ECS/SpriteComponent.hpp"
 #include "Map.hpp"
 #include "TextureManager.hpp"
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <iostream>
 
 SDL_Renderer *Game::renderer;
 
@@ -80,7 +84,8 @@ void Game::handleEvent() {
     case SDL_QUIT:
       isRunning = false;
       break;
-
+    case SDLK_SPACE:
+      player.getComponent<PositionComponent>().setXPos(player.getComponent<PositionComponent>().getXPos() + 5);
     default:
       break;
     }
